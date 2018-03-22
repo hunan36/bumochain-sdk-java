@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cn.bumo.access.sdk</groupId>
+        <artifactId>bumo-access-sdk</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>bumo-sdk-core</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.bumo.access.sdk</groupId>
+            <artifactId>bumo-sdk-bc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.bumo.access.sdk</groupId>
+            <artifactId>utils-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>cn.bubi.blockchain</groupId>
+			<artifactId>blockchain-sdk3-mo</artifactId>
+			<version>2.0.18-SNAPSHOT</version>
+      </dependency>	
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
