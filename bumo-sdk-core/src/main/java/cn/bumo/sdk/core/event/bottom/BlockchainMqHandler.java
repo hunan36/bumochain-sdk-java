@@ -155,10 +155,10 @@ public class BlockchainMqHandler{
             message.setSequenceNumber(tranEnvStore.getTransactionEnv().getTransaction().getNonce());
     		//共识失败
     		if(errCode == 0) {
-    			 System.out.println("交易成功errorcode：" + errCode +  " ,交易hash:" + txHash + ",错误信息："+tranEnvStore.getErrorDesc());
+    			 //System.out.println("交易成功errorcode：" + errCode +  " ,交易hash:" + txHash + ",错误信息："+tranEnvStore.getErrorDesc());
     			message.setSuccess(true);
     		} else {
-    			System.out.println("交易成功errorcode：" + errCode +  " ,交易hash:" + txHash+",错误信息："+tranEnvStore.getErrorDesc());
+    			//System.out.println("交易成功errorcode：" + errCode +  " ,交易hash:" + txHash+",错误信息："+tranEnvStore.getErrorDesc());
     			message.setSuccess(false);
     			message.setErrorMessage(tranEnvStore.getErrorDesc());
     		}
