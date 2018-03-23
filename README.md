@@ -67,12 +67,9 @@ public void config() throws SdkException{
     SDKProperties sdkProperties = new SDKProperties();
     sdkProperties.setEventUtis(eventUtis);
     sdkProperties.setIps(ips);
-    sdkProperties.setAccountPoolEnable(true);
     sdkProperties.setAddress(address);
     sdkProperties.setPublicKey(publicKey);
     sdkProperties.setPrivateKey(privateKey);
-    sdkProperties.setSize(12);
-    sdkProperties.setMark("test-demo-config");
     sdkProperties.setRedisSeqManagerEnable(true);
     sdkProperties.setHost("192.168.10.73");
     sdkProperties.setPort(10379);
