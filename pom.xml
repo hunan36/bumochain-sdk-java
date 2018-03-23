@@ -241,5 +241,19 @@
 		</pluginManagement>
 
 	</build>
+	
+	<distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Releases Repository</name>
+            <url>http://maven.bubidev.cn/content/repositories/releases</url>
 
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshots Repository</name>
+            <url>http://maven.bubidev.cn/content/repositories/snapshots</url>
+        </snapshotRepository>
+
+    </distributionManagement>
 </project>

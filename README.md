@@ -47,7 +47,12 @@ SDK本身无任何依赖框架，使用时载入配置即可运行，考虑到�
 
 > 其它说明
 1JDK需要1.8以上
-
+<dependency>
+  <groupId>cn.bumo.access.sdk</groupId>
+  <artifactId>bumo-sdk-core</artifactId>
+  <version>1.0.0</version>
+  <type>pom</type>
+</dependency>
 
 
 ### 1简单的config配置使用
