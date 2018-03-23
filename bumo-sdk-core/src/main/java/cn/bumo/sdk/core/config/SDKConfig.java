@@ -127,9 +127,13 @@ public class SDKConfig{
 
         // 8 初始化spi
         BcOperationService operationService = new BcOperationServiceImpl(sequenceManager, rpcService, transactionSyncManager, nodeManager, txFailManager, sponsorAccountPoolManager);
+        /**
+         * fix:去掉针对并发的优化措施
+         * TODO：待完善出新的优化方案
+         *
         if (sdkProperties.isAccountPoolEnable()) {
             sponsorAccountPoolManager.initPool(operationService, sdkProperties.getAddress(), sdkProperties.getPublicKey(), sdkProperties.getPrivateKey(), sdkProperties.getSize(), sdkProperties.getPoolFilepath(), sdkProperties.getMark());
-        }
+        }**/
 
         if (sdkProperties.isRedisSeqManagerEnable()) {
             TransactionContentSupport redisSupport = new RedisTransactionContentSupport(redisClient, operationService);

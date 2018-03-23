@@ -150,9 +150,12 @@ public class SDKEngine{
 
         // 8 初始化spi
         BcOperationService operationService = new BcOperationServiceImpl(sequenceManager, rpcService, transactionSyncManager, nodeManager, txFailManager, sponsorAccountPoolManager);
-        if (sdkProperties.isAccountPoolEnable()) {
+        /**
+         * fix:屏蔽掉账户池的操作
+         *
+         * if (sdkProperties.isAccountPoolEnable()) {
             sponsorAccountPoolManager.initPool(operationService, sdkProperties.getAddress(), sdkProperties.getPublicKey(), sdkProperties.getPrivateKey(), sdkProperties.getSize(), sdkProperties.getPoolFilepath(), sdkProperties.getMark());
-        }
+        }**/
 
         if (sdkProperties.isRedisSeqManagerEnable()) {
             TransactionContentSupport redisSupport = new RedisTransactionContentSupport(redisClient, operationService);

@@ -12,6 +12,7 @@ import cn.bumo.access.adaptation.blockchain.bc.request.test.ReqSubTransaction;
 import cn.bumo.access.adaptation.blockchain.bc.request.test.ReqTransactionJson;
 import cn.bumo.access.adaptation.blockchain.bc.request.test.TestTXReq;
 import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
+import cn.bumo.access.adaptation.blockchain.exception.BlockchainException;
 import cn.bumo.sdk.core.exception.SdkError;
 import cn.bumo.sdk.core.exception.SdkException;
 import cn.bumo.sdk.core.operation.BcOperation;
@@ -54,7 +55,7 @@ public class EvalTransaction{
         try {
 			buildInit();
 		} catch (SdkException e) {
-			logger.info("构建子交易失败！");
+			logger.info("评估费用交易构建子操作失败！");
 		}
     }
     
@@ -158,7 +159,15 @@ public class EvalTransaction{
     public TestTxResult commit() throws SdkException{
     	build();
     	System.out.println("请求参数："+JSON.toJSONString(request));
-    	return rpcService.testTransaction(request);
+		TestTxResult result = null;
+    	try {
+			 result = rpcService.testTransaction(request);
+		}catch (Exception e){
+    		if(e.getCause() instanceof  BlockchainException){
+				throw new SdkException(((BlockchainException) e.getCause()).getErrorCode(),((BlockchainException) e.getCause()).getErrorMessage());
+			}
+		}
+    	return result;
             
       }
     
