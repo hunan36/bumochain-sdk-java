@@ -18,9 +18,6 @@ import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.OperationFactory;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
 import cn.bumo.sdk.core.operation.impl.IssueAssetOperation;
-import cn.bumo.sdk.core.operation.impl.PaymentOperation;
-import cn.bumo.sdk.core.operation.impl.SetMetadataOperation;
-import cn.bumo.sdk.core.operation.impl.SetSignerWeightOperation;
 import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.TransactionContent;
@@ -87,7 +84,7 @@ public class OperationTest extends TestConfig{
         BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
         LOGGER.info(GsonUtil.toJson(keyPair));
         try {
-            CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
+            BcOperation bcOperation = new CreateAccountOperation.Builder()
                     .buildDestAddress(keyPair.getBubiAddress())
                     .buildAddInitBalance(10000000000000L)
                     //.buildScript("function main(input) { /*do what ever you want*/ }")
@@ -103,11 +100,11 @@ public class OperationTest extends TestConfig{
                     .build();
             
             EvalTransaction newAcctEval = getOperationService().newEvalTransaction(address);
-            TestTxResult fee = newAcctEval.buildAddOperation(createAccountOperation).commit();
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
 
             // 可以拿到blob,让前端签名
             TransactionBlob blob = transaction
-                    .buildAddOperation(createAccountOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     // 调用方可以在这里设置一个预期的区块偏移量，1个区块偏移量=3秒或1分钟，可以用3s进行推断，最快情况1分钟=20个区块偏移量
                     .buildFinalNotifySeqOffset(Transaction.HIGHT_FINAL_NOTIFY_SEQ_OFFSET)
@@ -155,14 +152,14 @@ public class OperationTest extends TestConfig{
         try {
             BlockchainKeyPair user1 = createAccountOperation();
             
-            IssueAssetOperation issueAssetOperation =  new IssueAssetOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).build();
+            BcOperation bcOperation =  new IssueAssetOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).build();
             EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user1.getBubiAddress());
-            TestTxResult fee = newAcctEval.buildAddOperation(issueAssetOperation).commit();
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
 
             Transaction issueTransaction = getOperationService().newTransaction(user1.getBubiAddress());
 
             issueTransaction
-                    .buildAddOperation(issueAssetOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();
@@ -174,11 +171,11 @@ public class OperationTest extends TestConfig{
             
             
             BlockchainKeyPair user2 = createAccountOperation();
-            PaymentOperation paymentOperation = OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
-            fee = getOperationService().newEvalTransaction(user1.getBubiAddress()).buildAddOperation(paymentOperation).commit();
+            bcOperation = OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
+            fee = getOperationService().newEvalTransaction(user1.getBubiAddress()).buildAddOperation(bcOperation).commit();
             Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
             transferTransaction
-                    .buildAddOperation(paymentOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();
@@ -209,13 +206,13 @@ public class OperationTest extends TestConfig{
 
             SetMetadata setMetadata = getQueryService().getAccount(user.getBubiAddress(), key1);
             setMetadata.setValue("这是新设置的value1");
-            SetMetadataOperation setMetadataOperation = OperationFactory.newUpdateSetMetadataOperation(setMetadata);
+            BcOperation bcOperation = OperationFactory.newUpdateSetMetadataOperation(setMetadata);
             EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            TestTxResult fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
             Transaction updateMetadataTransaction = getOperationService().newTransaction(user.getBubiAddress());
             
             updateMetadataTransaction
-                    .buildAddOperation(setMetadataOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
@@ -226,13 +223,13 @@ public class OperationTest extends TestConfig{
                     .anyMatch(setMetadata1 -> "这是新设置的value1".equals(setMetadata1.getValue())));
 
 
-            setMetadataOperation = OperationFactory.newSetMetadataOperation("newMetadataKey2", "newMetadataValue2");
+            bcOperation = OperationFactory.newSetMetadataOperation("newMetadataKey2", "newMetadataValue2");
             
             newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             Transaction newMetadataTransaction = getOperationService().newTransaction(user.getBubiAddress());
             newMetadataTransaction
-                    .buildAddOperation(setMetadataOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
@@ -246,12 +243,12 @@ public class OperationTest extends TestConfig{
             SetMetadata setMetadata2 = getQueryService().getAccount(user.getBubiAddress(), key2);
             setMetadata2.setValue("这是新设置的value222");
             
-            setMetadataOperation = OperationFactory.newSetMetadataOperation(setMetadata2.getKey(), setMetadata2.getValue(), setMetadata2.getVersion());
+            bcOperation = OperationFactory.newSetMetadataOperation(setMetadata2.getKey(), setMetadata2.getValue(), setMetadata2.getVersion());
             newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             Transaction updateMetadataTransaction2 = getOperationService().newTransaction(user.getBubiAddress());
             updateMetadataTransaction2
-                    .buildAddOperation(setMetadataOperation)
+                    .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
@@ -276,13 +273,13 @@ public class OperationTest extends TestConfig{
 
             BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
             
-            SetSignerWeightOperation setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 8);
+            BcOperation bcOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 8);
             EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            TestTxResult fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
                     .buildAddFee(fee.getRealFee())
-                    .buildAddOperation(setSignerWeightOperation)
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account = getQueryService().getAccount(user.getBubiAddress());
@@ -290,13 +287,13 @@ public class OperationTest extends TestConfig{
             Assert.assertTrue("增加一个签名人权重8,失败", account.getPriv().getSigners().stream()
                     .anyMatch(signer -> signer.getAddress().equals(keyPair.getBubiAddress()) && signer.getWeight() == 8));
             
-            setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(20);
+            bcOperation = OperationFactory.newSetSignerWeightOperation(20);
             newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             Transaction setSignerWeightTransaction = getOperationService().newTransaction(user.getBubiAddress());
             TransactionCommittedResult setSignerWeightResult = setSignerWeightTransaction
             		.buildAddFee(fee.getRealFee())
-                    .buildAddOperation(setSignerWeightOperation)
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             resultProcess(setSignerWeightResult, "修改权重结果状态:");
@@ -306,14 +303,14 @@ public class OperationTest extends TestConfig{
             Assert.assertEquals("修改权重到20,失败", 20, account2.getPriv().getMasterWeight());
 
 
-            setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 0);
+            bcOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 0);
             
             newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
-            fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
                     .buildAddFee(fee.getRealFee())
-                    .buildAddOperation(setSignerWeightOperation)
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account3 = getQueryService().getAccount(user.getBubiAddress());
