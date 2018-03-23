@@ -21,6 +21,7 @@ public class Demo_1_CreateAccount {
   		 * 做完交易后只能查下面这个接口
   		 */
   		System.out.println("结果：" + engine.getRpcService().getTransactionResultByHash(caRst.getTxHash()));
+  		System.exit(-1);
   }
   /***
    * 获取新生账户的账户地址哈希值

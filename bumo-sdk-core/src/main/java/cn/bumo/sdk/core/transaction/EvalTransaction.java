@@ -58,7 +58,7 @@ public class EvalTransaction{
 		}
     }
     
-    public EvalTransaction buildInit() throws SdkException{
+    private final EvalTransaction buildInit() throws SdkException{
         return buildTemplate(() -> {
         	subTransaction= new ReqSubTransaction();
         	subTransaction.setFee(0);
@@ -136,7 +136,7 @@ public class EvalTransaction{
     	return opers;
     }
     
-    public  EvalTransaction  build() throws SdkException {
+    private final EvalTransaction  build() throws SdkException {
     	checkBeforeCommit();
     	reqTransactionJson.setReqSubTransaction(subTransaction);
     	items[0] = reqTransactionJson;

@@ -29,10 +29,10 @@ public class IssueAssetOperation extends AbstractBcOperation{
         Chain.OperationIssueAsset.Builder operationIssueAsset = Chain.OperationIssueAsset.newBuilder();
 
         Chain.Asset.Builder asset = Chain.Asset.newBuilder();
-        Chain.AssetProperty.Builder assetProperty = Chain.AssetProperty.newBuilder();
-        assetProperty.setCode(assetCode);
+        Chain.AssetKey.Builder assetKey = Chain.AssetKey.newBuilder();
+        assetKey.setCode(assetCode);
 
-        asset.setProperty(assetProperty);
+        asset.setKey(assetKey);
         asset.setAmount(amount);
         operationIssueAsset.setCode(assetCode);
         operationIssueAsset.setAmount(amount);

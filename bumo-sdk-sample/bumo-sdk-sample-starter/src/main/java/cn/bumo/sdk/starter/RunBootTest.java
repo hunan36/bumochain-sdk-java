@@ -1,22 +1,25 @@
 package cn.bumo.sdk.starter;
 
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Account;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.exception.SdkException;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
 import cn.bumo.sdk.core.spi.BcOperationService;
 import cn.bumo.sdk.core.spi.BcQueryService;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.TransactionContent;
 import cn.bumo.sdk.core.transaction.model.TransactionBlob;
 import cn.bumo.sdk.core.transaction.model.TransactionCommittedResult;
 import cn.bumo.sdk.core.utils.GsonUtil;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author 布萌
@@ -37,7 +40,9 @@ public class RunBootTest implements CommandLineRunner{
         this.queryService = queryService;
     }
 
-    private static String address = "a00236e253497d93a2f4386aa57490476e80a2621b0f0d";
+    private static String address = "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3";
+    private static String pub_key = "b00180c2007082d1e2519a0f2d08fd65ba607fe3b8be646192a2f18a5fa0bee8f7a810d011ed";
+    private static String pri_key = "privbvYfqQyG3kZyHE4RX4TYVa32htw8xG4WdpCTrymPUJQ923XkKVbM";
 
     @RequestMapping("create")
     public void create(){
@@ -54,8 +59,8 @@ public class RunBootTest implements CommandLineRunner{
         // 简单操作
         createAccountOperation();
 
-
-        System.exit(0);
+        
+        //System.exit(0);
     }
 
     /**
@@ -63,14 +68,15 @@ public class RunBootTest implements CommandLineRunner{
      */
     private void createAccountOperation(){
         try {
-            Transaction transaction = operationService.newTransactionByAccountPool();
+            
 
             BlockchainKeyPair user = SecureKeyGenerator.generateBubiKeyPair();
             System.out.println(GsonUtil.toJson(user));
 
             CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
                     .buildDestAddress(user.getBubiAddress())
-                    .buildScript("function main(input) { /*do what ever you want*/ }")
+                    //.buildScript("function main(input) { /*do what ever you want*/ }")
+                    .buildAddInitBalance(10000000000L)
                     .buildAddMetadata("boot自定义key1", "boot自定义value1").buildAddMetadata("boot自定义key2", "boot自定义value2")
                     // 权限部分
                     .buildPriMasterWeight(15)
@@ -80,9 +86,15 @@ public class RunBootTest implements CommandLineRunner{
                     .buildAddPriTypeThreshold(OperationTypeV3.ISSUE_ASSET, 4)
                     .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
                     .build();
+            
+            
+            EvalTransaction evalTx = operationService.newEvalTransaction(address);
+            
+            TestTxResult txFee = evalTx.buildAddOperation(createAccountOperation).commit();
 
-
-            TransactionBlob transactionBlob = transaction.buildAddOperation(createAccountOperation).generateBlob();
+            
+            Transaction transaction = operationService.newTransaction(address);
+            TransactionBlob transactionBlob = transaction.buildAddOperation(createAccountOperation).buildAddFee(txFee.getRealFee()).generateBlob();
             String hash = transactionBlob.getHash();
 
             TransactionContent.put(hash, transaction);
@@ -90,6 +102,7 @@ public class RunBootTest implements CommandLineRunner{
 
             TransactionCommittedResult result = TransactionContent.get(hash)
                     .buildTxMetadata("交易metadata")
+                    .buildAddSigner(pub_key, pri_key)
                     .commit();
 
             System.out.println("\n------------------------------------------------");

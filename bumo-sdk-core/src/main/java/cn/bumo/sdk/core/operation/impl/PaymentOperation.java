@@ -35,10 +35,10 @@ public class PaymentOperation extends AbstractBcOperation{
         operationPayment.setDestAddress(targetAddress);
 
         Chain.Asset.Builder asset = Chain.Asset.newBuilder();
-        Chain.AssetProperty.Builder assetProperty = Chain.AssetProperty.newBuilder();
-        assetProperty.setIssuer(issuerAddress);
-        assetProperty.setCode(assetCode);
-        asset.setProperty(assetProperty);
+        Chain.AssetKey.Builder assetKey = Chain.AssetKey.newBuilder();
+        assetKey.setIssuer(issuerAddress);
+        assetKey.setCode(assetCode);
+        asset.setKey(assetKey);
         asset.setAmount(amount);
         operationPayment.setAsset(asset);
         operation.setPayment(operationPayment);
