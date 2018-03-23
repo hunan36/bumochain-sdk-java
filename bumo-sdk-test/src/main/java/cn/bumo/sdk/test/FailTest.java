@@ -1,12 +1,16 @@
 package cn.bumo.sdk.test;
 
 import cn.bumo.access.adaptation.blockchain.bc.response.Account;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.adaptation.blockchain.exception.BlockchainError;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.exception.SdkException;
+import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.OperationFactory;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
+import cn.bumo.sdk.core.operation.impl.IssueAssetOperation;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.utils.GsonUtil;
 import org.junit.Assert;
@@ -41,11 +45,16 @@ public class FailTest extends TestConfig{
     public void targetNotExistTest() throws SdkException{
         try {
             BlockchainKeyPair user = createAccountOperation();
+            
+            BcOperation bcOperation =  OperationFactory.newSetSignerWeightOperation(14);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(address);
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
 
 
             Transaction setSignerWeightTransaction = getOperationService().newTransaction("aaa");
             setSignerWeightTransaction
-                    .buildAddOperation(OperationFactory.newSetSignerWeightOperation(14))
+                    .buildAddOperation(bcOperation)
+                    .buildAddFee(fee.getRealFee())
                     .commit(user.getPubKey(), user.getPriKey());
         } catch (SdkException e) {
             processSdkException(e, "4 对象不存在", BlockchainError.TARGET_NOT_EXIST);
@@ -63,11 +72,17 @@ public class FailTest extends TestConfig{
 
         try {
             BlockchainKeyPair user1 = createAccountOperation();
-
-            Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
             BlockchainKeyPair user2 = createAccountOperation();
+            
+            BcOperation bcOperation =  OperationFactory.newPaymentOperation(user2.getBubiAddress(), "aaa", "assetCode", 1);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user1.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
+            
+            Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
+            
             transferTransaction
-                    .buildAddOperation(OperationFactory.newPaymentOperation(user2.getBubiAddress(), "aaa", "assetCode", 1))
+                    .buildAddOperation(bcOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();
         } catch (SdkException e) {
@@ -86,10 +101,16 @@ public class FailTest extends TestConfig{
     public void wrongSignatureTest() throws SdkException{
         try {
             BlockchainKeyPair user = createAccountOperation();
+            
+            
+            BcOperation bcOperation =  OperationFactory.newSetSignerWeightOperation(14);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
 
             Transaction setSignerWeightTransaction = getOperationService().newTransaction(user.getBubiAddress());
             setSignerWeightTransaction
-                    .buildAddOperation(OperationFactory.newSetSignerWeightOperation(14))
+                    .buildAddOperation(bcOperation)
+                    .buildAddFee(fee.getRealFee())
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account2 = getQueryService().getAccount(user.getBubiAddress());

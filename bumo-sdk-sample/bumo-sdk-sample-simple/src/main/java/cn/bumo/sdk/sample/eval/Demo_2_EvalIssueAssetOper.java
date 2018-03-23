@@ -18,7 +18,7 @@ public class Demo_2_EvalIssueAssetOper {
 	
 	public static void main(String[] args) throws Exception {
 		
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		evalIssueAsset(engine);
 		System.exit(-1);
 	}

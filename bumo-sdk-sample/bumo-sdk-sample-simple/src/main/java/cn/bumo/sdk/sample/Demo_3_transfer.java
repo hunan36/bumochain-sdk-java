@@ -1,7 +1,10 @@
 package cn.bumo.sdk.sample;
 
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.sdk.core.config.SDKEngine;
+import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.OperationFactory;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.utils.GsonUtil;
 /**
@@ -13,7 +16,7 @@ public class Demo_3_transfer {
 	
 	public static void main(String[] args) throws Exception {
 		
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		transferAsset(engine);
 		System.exit(-1);
 	}
@@ -32,12 +35,14 @@ public class Demo_3_transfer {
 			
 			System.out.println("=========================发行资产前账户1：\n"+GsonUtil.toJson(engine.getQueryService().getAccount(user1Addr)));
 			System.out.println("=========================发行资产前账户2：\n"+GsonUtil.toJson(engine.getQueryService().getAccount(user2Addr)));
-		
-			Transaction transferTransaction = engine.getOperationService().newTransaction(iar.getIssueKeyPair().getBubiAddress());
+			BcOperation bcOperation = OperationFactory.newPaymentOperation(user2Addr, user1Addr, "600001", 1);
+			EvalTransaction newAcctEval = engine.getOperationService().newEvalTransaction(user1Addr);
+	        TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
+			Transaction transferTransaction = engine.getOperationService().newTransaction(user1Addr);
 			
 			transferTransaction
-		        .buildAddOperation(OperationFactory.newPaymentOperation(user2Addr, user1Addr, "600001", 1))
-		        .buildAddFee(500000)
+		        .buildAddOperation(bcOperation)
+		        .buildAddFee(fee.getRealFee())
 		        .buildAddSigner(iar.getIssueKeyPair().getPubKey(), iar.getIssueKeyPair().getPriKey())
 		        .commit();
 			

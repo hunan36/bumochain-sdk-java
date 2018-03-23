@@ -19,7 +19,7 @@ import cn.bumo.sdk.sample.NewActResult;
 public class Demo_2_EvalAndOperIssueAsset {
 	
 	public static void main(String[] args) throws Exception {
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		evalAndIssueAsset(engine);
 		System.exit(-1);
 	}

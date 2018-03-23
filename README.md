@@ -72,6 +72,8 @@ public void config() throws SdkException{
     sdkProperties.setHost("192.168.10.73");
     sdkProperties.setPort(10379);
     sdkProperties.setPassword("bubi888");
+    //InitBalanceEnable默认初始为true
+    sdkProperties.setInitBalanceEnable(true);
     config.configSdk(sdkProperties);
 
     // 完成配置获得spi

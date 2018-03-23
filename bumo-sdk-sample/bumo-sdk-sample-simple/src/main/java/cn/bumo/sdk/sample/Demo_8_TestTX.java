@@ -21,7 +21,7 @@ import cn.bumo.sdk.core.config.SDKEngine;
 public class Demo_8_TestTX {
 
 	public static void main(String[] args) throws Exception {
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		testTX(engine);
 	}
 	

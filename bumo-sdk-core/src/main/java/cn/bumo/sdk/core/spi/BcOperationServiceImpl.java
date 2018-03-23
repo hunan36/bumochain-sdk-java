@@ -32,10 +32,10 @@ public class BcOperationServiceImpl implements BcOperationService{
         this.sponsorAccountPoolManager = sponsorAccountPoolManager;
     }
 
-    @Override
-    public Transaction newTransactionByAccountPool(){
-        return new Transaction(sponsorAccountPoolManager.getRichSponsorAccount(), sequenceManager, rpcService, transactionSyncManager, nodeManager, txFailManager);
-    }
+//    @Override
+//    public Transaction newTransactionByAccountPool(){
+//        return new Transaction(sponsorAccountPoolManager.getRichSponsorAccount(), sequenceManager, rpcService, transactionSyncManager, nodeManager, txFailManager);
+//    }
 
     @Override
     public Transaction newTransaction(String sponsorAddress){

@@ -1,11 +1,14 @@
 package cn.bumo.sdk.sample;
 
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.config.SDKEngine;
 import cn.bumo.sdk.core.exception.SdkException;
+import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.model.TransactionCommittedResult;
 import cn.bumo.sdk.core.utils.GsonUtil;
@@ -13,14 +16,14 @@ import cn.bumo.sdk.core.utils.GsonUtil;
 public class Demo_1_CreateAccount {
 //  创始者
   public static void main(String[] args) throws SdkException{
-  		SDKEngine engine = SDKEngine.getInstance().configSdk();
+  		SDKEngine engine = SDKEngine.getInstance();
   		NewActResult caRst = newActOper(engine);
       
   		System.out.println("刚操作的交易hash = " + caRst.getTxHash());
   		/**
   		 * 做完交易后只能查下面这个接口
   		 */
-  		System.out.println("结果：" + engine.getRpcService().getTransactionResultByHash(caRst.getTxHash()));
+  		System.out.println("结果：" + SDKEngine.getInstance().getRpcService().getTransactionResultByHash(caRst.getTxHash()));
   		System.exit(-1);
   }
   /***
@@ -46,7 +49,7 @@ public class Demo_1_CreateAccount {
    */
   public static NewActResult newActOper(SDKEngine engine){
       try {
-          Transaction transaction = engine.getOperationService().newTransaction(engine.getSdkProperties().getAddress());
+          
 
           BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
           System.out.println("" + GsonUtil.toJson(keyPair));
@@ -57,7 +60,7 @@ public class Demo_1_CreateAccount {
           
           
           
-          CreateAccountOperation createAccountOper = new CreateAccountOperation.Builder()
+          BcOperation bcOperation = new CreateAccountOperation.Builder()
         		  // 要生成的账号的地址
                   .buildDestAddress(keyPair.getBubiAddress())
                   // 合约脚本
@@ -76,11 +79,16 @@ public class Demo_1_CreateAccount {
                   .buildAddPriSigner(user1.getBubiAddress(), 10)
                   .buildAddPriSigner(user2.getBubiAddress(), 10)
                   .build();
+          
+          EvalTransaction newAcctEval = engine.getOperationService().newEvalTransaction(engine.getSdkProperties().getAddress());
+          TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
+          
+          Transaction transaction = engine.getOperationService().newTransaction(SDKEngine.getInstance().getSdkProperties().getAddress());
 
-          TransactionCommittedResult result = transaction.buildAddOperation(createAccountOper)
+          TransactionCommittedResult result = transaction.buildAddOperation(bcOperation)
                   .buildTxMetadata("交易metadata")
-                  .buildAddSigner(engine.getSdkProperties().getPublicKey(), engine.getSdkProperties().getPrivateKey())
-                  .buildAddFee(500000)
+                  .buildAddSigner(SDKEngine.getInstance().getSdkProperties().getPublicKey(), SDKEngine.getInstance().getSdkProperties().getPrivateKey())
+                  .buildAddFee(fee.getRealFee())
                   .commit();
 
           System.out.println("\n------------------------------------------------");

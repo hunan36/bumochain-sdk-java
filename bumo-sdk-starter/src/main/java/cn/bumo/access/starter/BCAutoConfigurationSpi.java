@@ -39,11 +39,11 @@ public class BCAutoConfigurationSpi{
         BcOperationService bcOperationService = new BcOperationServiceImpl(bcSequenceManager, bcRpcService, bcTransactionSyncManager, bcNodeManager, txFailManager, sponsorAccountPoolManager);
         // 这里初始化账户池
         BlockchainProperties.SponsorAccountPoolConfig accountPoolConfig = blockchainProperties.getAccountPool();
-        if (accountPoolConfig.isEnable()) {
-            sponsorAccountPoolManager.initPool(bcOperationService,
-                    accountPoolConfig.getAddress(), accountPoolConfig.getPublicKey(), accountPoolConfig.getPrivateKey(),
-                    accountPoolConfig.getPoolSize(), accountPoolConfig.getFilePath(), accountPoolConfig.getSponsorAccountMark());
-        }
+//        if (accountPoolConfig.isEnable()) {
+//            sponsorAccountPoolManager.initPool(bcOperationService,
+//                    accountPoolConfig.getAddress(), accountPoolConfig.getPublicKey(), accountPoolConfig.getPrivateKey(),
+//                    accountPoolConfig.getPoolSize(), accountPoolConfig.getFilePath(), accountPoolConfig.getSponsorAccountMark());
+//        }
         // 切换到redis support
         if (blockchainProperties.getRedisSeq().isEnable()) {
             TransactionContentSupport redisSupport = new RedisTransactionContentSupport(bcRedisClient, bcOperationService);

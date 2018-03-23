@@ -9,6 +9,7 @@ import cn.bumo.access.adaptation.blockchain.bc.response.operation.CreateAccount;
 import cn.bumo.access.adaptation.blockchain.bc.response.operation.SetMetadata;
 import cn.bumo.blockchain.adapter3.Chain;
 import cn.bumo.blockchain.adapter3.Common;
+import cn.bumo.sdk.core.config.SDKConfig;
 import cn.bumo.sdk.core.exception.SdkError;
 import cn.bumo.sdk.core.exception.SdkException;
 import cn.bumo.sdk.core.operation.AbstractBcOperation;
@@ -147,6 +148,9 @@ public class CreateAccountOperation extends AbstractBcOperation{
         @Override
         public void checkPass() throws SdkException{
             Assert.notEmpty(operation.createAccount.getDestAddress(), SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
+            if(SDKConfig.initBalanceEnable){
+                Assert.notTrue(operation.createAccount.getInitBalance() == 0, SdkError.OPERATION_ERROR_NOT_INITBALANCE);
+            }
         }
 
 		

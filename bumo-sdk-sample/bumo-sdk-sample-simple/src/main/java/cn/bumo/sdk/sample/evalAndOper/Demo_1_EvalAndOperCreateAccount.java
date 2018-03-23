@@ -17,7 +17,7 @@ public class Demo_1_EvalAndOperCreateAccount {
 
 	public static void main(String[] args)  throws SdkException {
 		// TODO Auto-generated method stub
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		evalAndNewActOper(engine);
 		System.exit(-1);
 	}

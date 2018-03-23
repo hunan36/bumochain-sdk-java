@@ -22,7 +22,7 @@ public class Demo_7_EvalPayCoinOper {
 	private static Logger logger = LoggerFactory.getLogger(Demo_7_EvalPayCoinOper.class);
 
 	public static void main(String[] args) throws Exception {
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		evalPayCoinOper(engine);
 		System.exit(-1);
 	}

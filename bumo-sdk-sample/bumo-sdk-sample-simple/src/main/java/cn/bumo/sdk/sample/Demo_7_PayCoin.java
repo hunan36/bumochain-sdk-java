@@ -1,9 +1,11 @@
 package cn.bumo.sdk.sample;
 
-import cn.bumo.access.adaptation.blockchain.bc.response.Account;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.sdk.core.config.SDKEngine;
+import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.OperationFactory;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.utils.GsonUtil;
 /**
  * 
@@ -15,7 +17,7 @@ import cn.bumo.sdk.core.utils.GsonUtil;
 public class Demo_7_PayCoin {
 
 	public static void main(String[] args) throws Exception {
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		payCoin(engine);
 		System.exit(-1);
 	}
@@ -44,10 +46,14 @@ public class Demo_7_PayCoin {
 			System.out.println("账户一：\n " + GsonUtil.toJson(engine.getQueryService().getAccount(user1Addr)));
 			System.out.println("账户二：\n " + GsonUtil.toJson(engine.getQueryService().getAccount(user2Addr)));
 			//...
+			
+			BcOperation bcOperation = OperationFactory.newPayCoinOperation(user2Addr, 2000);
+			EvalTransaction newAcctEval = engine.getOperationService().newEvalTransaction(user1Addr);
+	        TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
 			engine.getOperationService()
 	            .newTransaction(user1Addr)
-	            .buildAddOperation(OperationFactory.newPayCoinOperation(user2Addr, 2000))
-	            .buildAddFee(500000)
+	            .buildAddOperation(bcOperation)
+	            .buildAddFee(fee.getRealFee())
 	            .commit(user1.getPubKey(), user1.getPriKey());
 			
 			System.out.println("支付BU币之前：\n");

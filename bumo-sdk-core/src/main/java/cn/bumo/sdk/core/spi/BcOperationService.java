@@ -16,7 +16,7 @@ public interface BcOperationService{
      *
      * @see cn.bubi.sdk.core.operation.OperationFactory 操作工厂
      */
-    Transaction newTransactionByAccountPool();
+//    Transaction newTransactionByAccountPool();
 
     /**
      * 开启一笔交易

@@ -12,7 +12,7 @@ import cn.bumo.sdk.sample.NewActResult;
 public class Demo_4_EvalMetaDataOper {
 
 	public static void main(String[] args) throws Exception {
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		operMetaData(engine);
 		System.exit(-1);
 	}

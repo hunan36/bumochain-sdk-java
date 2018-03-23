@@ -62,6 +62,7 @@ public class SDKEngine{
     		synchronized(SDKEngine.class){
     			if(instance == null){
     				instance = new SDKEngine();
+    				instance.configSdk();
     			}
     		}
     	} catch(Exception e)  {
@@ -70,7 +71,7 @@ public class SDKEngine{
     	return instance;
     }
 
-    public SDKEngine configSdk() throws SdkException{
+    private SDKEngine configSdk() throws SdkException{
     	
     	try {
     		sdkProperties = PropUtil.newInstanceByConf( SDKProperties.class,"/config.properties");

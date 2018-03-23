@@ -22,6 +22,16 @@ public class SDKProperties{
     private int port;
     private String password;
     private String database;
+    
+    private boolean initBalanceEnable = true;
+
+    public boolean isInitBalanceEnable() {
+        return initBalanceEnable;
+    }
+
+    public void setInitBalanceEnable(boolean initBalanceEnable) {
+        this.initBalanceEnable = initBalanceEnable;
+    }
 
     public String getDatabase(){
         return database;

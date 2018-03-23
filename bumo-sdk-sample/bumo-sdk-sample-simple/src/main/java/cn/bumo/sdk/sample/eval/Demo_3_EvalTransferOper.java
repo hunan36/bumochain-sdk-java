@@ -17,7 +17,7 @@ public class Demo_3_EvalTransferOper {
 	
 	public static void main(String[] args) throws Exception {
 		
-		SDKEngine engine = SDKEngine.getInstance().configSdk();
+		SDKEngine engine = SDKEngine.getInstance();
 		transferAsset(engine);
 		System.exit(-1);
 	}

@@ -18,7 +18,7 @@ public class Demo_1_EvalCreateAccountOper {
 	
 //  创始者
   public static void main(String[] args) throws SdkException{
-  		SDKEngine engine = SDKEngine.getInstance().configSdk();
+  		SDKEngine engine = SDKEngine.getInstance();
   		long fee = evalNewActOper(engine);
       
   		System.out.println("新建账户的费用： " + fee);
