@@ -1,5 +1,7 @@
 package cn.bumo.access.adaptation.blockchain.bc.response;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * 资产
  *
@@ -7,7 +9,7 @@ package cn.bumo.access.adaptation.blockchain.bc.response;
  */
 public class Asset{
     private long amount;
-    private Property property;
+    private Key key;
 
     public long getAmount(){
         return amount;
@@ -17,11 +19,11 @@ public class Asset{
         this.amount = amount;
     }
 
-    public Property getProperty(){
-        return property;
+    public Key getKey() {
+        return key;
     }
 
-    public void setProperty(Property property){
-        this.property = property;
+    public void setKey(Key key) {
+        this.key = key;
     }
 }

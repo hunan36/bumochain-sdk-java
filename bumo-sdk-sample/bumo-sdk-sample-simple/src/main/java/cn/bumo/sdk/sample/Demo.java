@@ -2,6 +2,7 @@ package cn.bumo.sdk.sample;
 
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Account;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.config.SDKConfig;
@@ -10,6 +11,7 @@ import cn.bumo.sdk.core.exception.SdkException;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
 import cn.bumo.sdk.core.spi.BcOperationService;
 import cn.bumo.sdk.core.spi.BcQueryService;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.model.TransactionCommittedResult;
 import cn.bumo.sdk.core.utils.GsonUtil;
@@ -21,25 +23,25 @@ import cn.bumo.sdk.core.utils.GsonUtil;
 public class Demo{
 
     //    创始者
-    private static String address = "a0012ea403227b861289ed5fcedd30e51e85ef7397ebc6";
-    private static String publicKey = "b001e9fd31a0fc25af3123f67575cdd0c6b8c2192eead9f58728a3fb46accdc0faa67f";
-    private static String privateKey = "c0018335e8c3e34cceaa24027207792318bc388bea443b53d5ba9e00e5adb6739bb61b";
+    private static String address = "buQdwLcW5dcWEg8cbKrFN3WKPXXwh5JTqKAH";
+    private static String publicKey = "b00121a6f43b505453bf8f3ed72966a6886632a1b6bec224062762309dbc143da24a92dcf038";
+    private static String privateKey = "privbUNfe7NtchzD4aJnPYSZEr3TXPU2upKemTrV26NfM7XLSY9C12po";
 
     public static void main(String[] args) throws SdkException{
 
-        String eventUtis = "ws://192.168.10.100:7053,ws://192.168.10.110:7053,ws://192.168.10.120:7053,ws://192.168.10.130:7053";
-        String ips = "192.168.10.100:29333,192.168.10.110:29333,192.168.10.120:29333,192.168.10.130:29333";
+        String eventUtis = "ws://192.168.7.51:36003,ws://192.168.7.52:36003,ws://192.168.7.53:36003,ws://192.168.7.54:36003";
+        String ips = "192.168.7.51:36002,192.168.7.52:36002,192.168.7.53:36002,192.168.7.54:36002";
 
         SDKConfig config = new SDKConfig();
         SDKProperties sdkProperties = new SDKProperties();
         sdkProperties.setEventUtis(eventUtis);
         sdkProperties.setIps(ips);
-        sdkProperties.setAccountPoolEnable(true);
+//        sdkProperties.setAccountPoolEnable(true);
         sdkProperties.setAddress(address);
         sdkProperties.setPublicKey(publicKey);
         sdkProperties.setPrivateKey(privateKey);
-        sdkProperties.setSize(12);
-        sdkProperties.setMark("test-demo-config");
+//        sdkProperties.setSize(12);
+//        sdkProperties.setMark("test-demo-config");
         sdkProperties.setRedisSeqManagerEnable(true);
         sdkProperties.setHost("192.168.10.73");
         sdkProperties.setPort(10379);
@@ -70,7 +72,8 @@ public class Demo{
             //SDK封装一个CreateContactAcccountOperation（合约账号）
             CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
                     .buildDestAddress(keyPair.getBubiAddress())
-                    .buildScript("function main(input) { /*do what ever you want*/ }")//创建合约账户必须有这一行
+                    //.buildScript("function main(input) { /*do what ever you want*/ }")//创建合约账户必须有这一行
+                    .buildAddInitBalance(10000000000000L)
                     .buildAddMetadata("key1", "自定义value1").buildAddMetadata("key2", "自定义value2")
                     // 权限部分
                     .buildPriMasterWeight(15)
@@ -81,10 +84,17 @@ public class Demo{
                     .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
                     //没有签名列表。。。。
                     .build();
+            
+            EvalTransaction newAcctEval = operationService.newEvalTransaction(address);
+	          TestTxResult testTx = newAcctEval.buildAddOperation(createAccountOperation).commit();
+
+	          long fee = testTx.getRealFee();
+
 
             TransactionCommittedResult result = transaction.buildAddOperation(createAccountOperation)
                     .buildTxMetadata("交易metadata")
                     .buildAddSigner(publicKey, privateKey)
+                    .buildAddFee(fee)
                     .commit();
 
             System.out.println("\n------------------------------------------------");

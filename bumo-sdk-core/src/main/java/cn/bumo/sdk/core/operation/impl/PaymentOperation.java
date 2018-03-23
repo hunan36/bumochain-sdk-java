@@ -2,7 +2,7 @@ package cn.bumo.sdk.core.operation.impl;
 
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Asset;
-import cn.bumo.access.adaptation.blockchain.bc.response.Property;
+import cn.bumo.access.adaptation.blockchain.bc.response.Key;
 import cn.bumo.access.adaptation.blockchain.bc.response.operation.Payment;
 import cn.bumo.blockchain.adapter3.Chain;
 import cn.bumo.sdk.core.exception.SdkError;
@@ -53,8 +53,8 @@ public class PaymentOperation extends AbstractBcOperation{
         	PaymentOperation paymentOperation = new PaymentOperation();
         	this.payment = paymentOperation.payment;
         	Asset asset = new Asset();
-        	Property property = new Property();
-        	asset.setProperty(property);
+        	Key key = new Key();
+        	asset.setKey(key);
         	this.payment.setAsset(asset);
             return paymentOperation;
         }
@@ -81,14 +81,14 @@ public class PaymentOperation extends AbstractBcOperation{
             	operation.issuerAddress = issuerAddress;
             	//Asset asset = operation.payment.getAsset();
             	//asset.getProperty()
-            	payment.getAsset().getProperty().setIssuer(issuerAddress);
+            	payment.getAsset().getKey().setIssuer(issuerAddress);
             });
         }
 
         public Builder buildAssetCode(String assetCode) throws SdkException{
             return buildTemplate(() ->{ 
             		operation.assetCode = assetCode;
-            		payment.getAsset().getProperty().setCode(assetCode);
+            		payment.getAsset().getKey().setCode(assetCode);
             	});
         }
 

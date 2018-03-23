@@ -1,25 +1,32 @@
 package cn.bumo.sdk.test;
 
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Account;
 import cn.bumo.access.adaptation.blockchain.bc.response.TransactionHistory;
 import cn.bumo.access.adaptation.blockchain.bc.response.operation.SetMetadata;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.exception.SdkException;
+import cn.bumo.sdk.core.operation.BcOperation;
 import cn.bumo.sdk.core.operation.OperationFactory;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
 import cn.bumo.sdk.core.operation.impl.IssueAssetOperation;
+import cn.bumo.sdk.core.operation.impl.PaymentOperation;
+import cn.bumo.sdk.core.operation.impl.SetMetadataOperation;
+import cn.bumo.sdk.core.operation.impl.SetSignerWeightOperation;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.TransactionContent;
 import cn.bumo.sdk.core.transaction.model.TransactionBlob;
 import cn.bumo.sdk.core.transaction.model.TransactionCommittedResult;
 import cn.bumo.sdk.core.utils.GsonUtil;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * @author 布萌
@@ -82,7 +89,8 @@ public class OperationTest extends TestConfig{
         try {
             CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
                     .buildDestAddress(keyPair.getBubiAddress())
-                    .buildScript("function main(input) { /*do what ever you want*/ }")
+                    .buildAddInitBalance(10000000000000L)
+                    //.buildScript("function main(input) { /*do what ever you want*/ }")
                     .buildAddMetadata("boot自定义key1", "boot自定义value1").buildAddMetadata("boot自定义key2", "boot自定义value2")
                     // 权限部分
                     .buildPriMasterWeight(15)
@@ -93,10 +101,14 @@ public class OperationTest extends TestConfig{
                     .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
                     .buildOperationMetadata("操作metadata")// 这个操作应该最后build
                     .build();
+            
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(address);
+            TestTxResult fee = newAcctEval.buildAddOperation(createAccountOperation).commit();
 
             // 可以拿到blob,让前端签名
             TransactionBlob blob = transaction
                     .buildAddOperation(createAccountOperation)
+                    .buildAddFee(fee.getRealFee())
                     // 调用方可以在这里设置一个预期的区块偏移量，1个区块偏移量=3秒或1分钟，可以用3s进行推断，最快情况1分钟=20个区块偏移量
                     .buildFinalNotifySeqOffset(Transaction.HIGHT_FINAL_NOTIFY_SEQ_OFFSET)
                     .generateBlob();
@@ -130,52 +142,6 @@ public class OperationTest extends TestConfig{
         Assert.assertNotNull("新建的账号不能查询到", account);
     }
 
-    /**
-     * 通过账户池发起交易
-     */
-    @Test
-    public void createAccountByPool(){
-    	
-        Transaction transaction = getOperationService().newTransactionByAccountPool();
-
-        BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
-        LOGGER.info(GsonUtil.toJson(keyPair));
-        try {
-            CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
-                    .buildDestAddress(keyPair.getBubiAddress())
-                    .buildScript("function main(input) { /*do what ever you want*/ }")
-                    .buildAddMetadata("boot自定义key1", "boot自定义value1").buildAddMetadata("boot自定义key2", "boot自定义value2")
-                    // 权限部分
-                    .buildPriMasterWeight(15)
-                    .buildPriTxThreshold(15)
-                    .buildAddPriTypeThreshold(OperationTypeV3.CREATE_ACCOUNT, 8)
-                    .buildAddPriTypeThreshold(OperationTypeV3.SET_METADATA, 6)
-                    .buildAddPriTypeThreshold(OperationTypeV3.ISSUE_ASSET, 4)
-                    .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
-                    .buildOperationMetadata("操作metadata")// 这个操作应该最后build
-                    .build();
-
-            TransactionBlob blob = transaction
-                    .buildAddOperation(createAccountOperation)
-                    // 调用方可以在这里设置一个预期的区块偏移量，1个区块偏移量=3秒或1分钟，可以用3s进行推断，最快情况1分钟=20个区块偏移量
-                    .buildFinalNotifySeqOffset(Transaction.HIGHT_FINAL_NOTIFY_SEQ_OFFSET)
-                    .generateBlob();
-
-
-            // 签名完成之后可以继续提交,需要自己维护transaction保存
-            TransactionCommittedResult result = transaction
-                    //.buildAddDigest("公钥",new byte[]{}) 可以让前端的签名在这里加进来
-                    .commit();
-            resultProcess(result, "创建账号状态:");
-
-        } catch (SdkException e) {
-            e.printStackTrace();
-        }
-
-        Account account = getQueryService().getAccount(keyPair.getBubiAddress());
-        LOGGER.info("新建的账号:" + GsonUtil.toJson(account));
-        Assert.assertNotNull("新建的账号不能查询到", account);
-    }
 
     /**
      * 2,3发行和转移资产操作
@@ -188,11 +154,16 @@ public class OperationTest extends TestConfig{
         long transferAmount = 9;
         try {
             BlockchainKeyPair user1 = createAccountOperation();
+            
+            IssueAssetOperation issueAssetOperation =  new IssueAssetOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).build();
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user1.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(issueAssetOperation).commit();
 
             Transaction issueTransaction = getOperationService().newTransaction(user1.getBubiAddress());
 
             issueTransaction
-                    .buildAddOperation(new IssueAssetOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).build())
+                    .buildAddOperation(issueAssetOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();
 
@@ -200,11 +171,15 @@ public class OperationTest extends TestConfig{
             LOGGER.info("user1资产:" + GsonUtil.toJson(account.getAssets()));
             Assert.assertNotNull("发行资产不能为空", account.getAssets());
 
-            Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
+            
+            
             BlockchainKeyPair user2 = createAccountOperation();
-
+            PaymentOperation paymentOperation = OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
+            fee = getOperationService().newEvalTransaction(user1.getBubiAddress()).buildAddOperation(paymentOperation).commit();
+            Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
             transferTransaction
-                    .buildAddOperation(OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount))
+                    .buildAddOperation(paymentOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();
 
@@ -234,11 +209,14 @@ public class OperationTest extends TestConfig{
 
             SetMetadata setMetadata = getQueryService().getAccount(user.getBubiAddress(), key1);
             setMetadata.setValue("这是新设置的value1");
-
-
+            SetMetadataOperation setMetadataOperation = OperationFactory.newUpdateSetMetadataOperation(setMetadata);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
             Transaction updateMetadataTransaction = getOperationService().newTransaction(user.getBubiAddress());
+            
             updateMetadataTransaction
-                    .buildAddOperation(OperationFactory.newUpdateSetMetadataOperation(setMetadata))
+                    .buildAddOperation(setMetadataOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
 
@@ -248,9 +226,14 @@ public class OperationTest extends TestConfig{
                     .anyMatch(setMetadata1 -> "这是新设置的value1".equals(setMetadata1.getValue())));
 
 
+            setMetadataOperation = OperationFactory.newSetMetadataOperation("newMetadataKey2", "newMetadataValue2");
+            
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
             Transaction newMetadataTransaction = getOperationService().newTransaction(user.getBubiAddress());
             newMetadataTransaction
-                    .buildAddOperation(OperationFactory.newSetMetadataOperation("newMetadataKey2", "newMetadataValue2"))
+                    .buildAddOperation(setMetadataOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
 
@@ -262,10 +245,14 @@ public class OperationTest extends TestConfig{
 
             SetMetadata setMetadata2 = getQueryService().getAccount(user.getBubiAddress(), key2);
             setMetadata2.setValue("这是新设置的value222");
-
+            
+            setMetadataOperation = OperationFactory.newSetMetadataOperation(setMetadata2.getKey(), setMetadata2.getValue(), setMetadata2.getVersion());
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(setMetadataOperation).commit();
             Transaction updateMetadataTransaction2 = getOperationService().newTransaction(user.getBubiAddress());
             updateMetadataTransaction2
-                    .buildAddOperation(OperationFactory.newSetMetadataOperation(setMetadata2.getKey(), setMetadata2.getValue(), setMetadata2.getVersion()))
+                    .buildAddOperation(setMetadataOperation)
+                    .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user.getPubKey(), user.getPriKey())
                     .commit();
 
@@ -288,21 +275,28 @@ public class OperationTest extends TestConfig{
             BlockchainKeyPair user = createAccountOperation();
 
             BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
-
-
+            
+            SetSignerWeightOperation setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 8);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
-                    .buildAddOperation(OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 8))
+                    .buildAddFee(fee.getRealFee())
+                    .buildAddOperation(setSignerWeightOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account = getQueryService().getAccount(user.getBubiAddress());
             LOGGER.info("增加一个签名人权重8:" + GsonUtil.toJson(account.getPriv()));
             Assert.assertTrue("增加一个签名人权重8,失败", account.getPriv().getSigners().stream()
                     .anyMatch(signer -> signer.getAddress().equals(keyPair.getBubiAddress()) && signer.getWeight() == 8));
-
+            
+            setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(20);
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
             Transaction setSignerWeightTransaction = getOperationService().newTransaction(user.getBubiAddress());
             TransactionCommittedResult setSignerWeightResult = setSignerWeightTransaction
-                    .buildAddOperation(OperationFactory.newSetSignerWeightOperation(20))
+            		.buildAddFee(fee.getRealFee())
+                    .buildAddOperation(setSignerWeightOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             resultProcess(setSignerWeightResult, "修改权重结果状态:");
@@ -312,9 +306,14 @@ public class OperationTest extends TestConfig{
             Assert.assertEquals("修改权重到20,失败", 20, account2.getPriv().getMasterWeight());
 
 
+            setSignerWeightOperation = OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 0);
+            
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(setSignerWeightOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
-                    .buildAddOperation(OperationFactory.newSetSignerWeightOperation(keyPair.getBubiAddress(), 0))
+                    .buildAddFee(fee.getRealFee())
+                    .buildAddOperation(setSignerWeightOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account3 = getQueryService().getAccount(user.getBubiAddress());
@@ -334,18 +333,29 @@ public class OperationTest extends TestConfig{
     public void setThreshold(){
         try {
             BlockchainKeyPair user = createAccountOperation();
+            
+            
+            BcOperation bcOperation = OperationFactory.newSetThresholdOperation(14);
+            EvalTransaction newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
-                    .buildAddOperation(OperationFactory.newSetThresholdOperation(14))
+                    .buildAddFee(fee.getRealFee())
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account = getQueryService().getAccount(user.getBubiAddress());
             LOGGER.info("更新交易门限到14:" + GsonUtil.toJson(account.getPriv()));
             Assert.assertEquals("更新交易门限到14,失败", 14, account.getPriv().getThreshold().getTxThreshold());
-
+            
+            bcOperation = OperationFactory.newSetThresholdOperation(OperationTypeV3.CREATE_ACCOUNT, 10);
+            
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
-                    .buildAddOperation(OperationFactory.newSetThresholdOperation(OperationTypeV3.CREATE_ACCOUNT, 10))
+                    .buildAddFee(fee.getRealFee())
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account2 = getQueryService().getAccount(user.getBubiAddress());
@@ -353,9 +363,15 @@ public class OperationTest extends TestConfig{
             Assert.assertTrue("更新创建账号1到10,失败", account2.getPriv().getThreshold().getTypeThresholds().stream()
                     .anyMatch(typeThreshold -> typeThreshold.getType() == 1 && typeThreshold.getThreshold() == 10));
 
+            
+            bcOperation = OperationFactory.newSetThresholdOperation(OperationTypeV3.SET_THRESHOLD, 2);
+            
+            newAcctEval = getOperationService().newEvalTransaction(user.getBubiAddress());
+            fee = newAcctEval.buildAddOperation(bcOperation).commit();
             getOperationService()
                     .newTransaction(user.getBubiAddress())
-                    .buildAddOperation(OperationFactory.newSetThresholdOperation(OperationTypeV3.SET_THRESHOLD, 2))
+                    .buildAddFee(fee.getRealFee())
+                    .buildAddOperation(bcOperation)
                     .commit(user.getPubKey(), user.getPriKey());
 
             Account account3 = getQueryService().getAccount(user.getBubiAddress());

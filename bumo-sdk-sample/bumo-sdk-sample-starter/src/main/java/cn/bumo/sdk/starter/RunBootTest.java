@@ -40,9 +40,9 @@ public class RunBootTest implements CommandLineRunner{
         this.queryService = queryService;
     }
 
-    private static String address = "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3";
-    private static String pub_key = "b00180c2007082d1e2519a0f2d08fd65ba607fe3b8be646192a2f18a5fa0bee8f7a810d011ed";
-    private static String pri_key = "privbvYfqQyG3kZyHE4RX4TYVa32htw8xG4WdpCTrymPUJQ923XkKVbM";
+    private static String address = "buQdwLcW5dcWEg8cbKrFN3WKPXXwh5JTqKAH";
+    private static String pub_key = "b00121a6f43b505453bf8f3ed72966a6886632a1b6bec224062762309dbc143da24a92dcf038";
+    private static String pri_key = "privbUNfe7NtchzD4aJnPYSZEr3TXPU2upKemTrV26NfM7XLSY9C12po";
 
     @RequestMapping("create")
     public void create(){

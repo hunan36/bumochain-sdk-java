@@ -2,6 +2,7 @@ package cn.bumo.sdk.test;
 
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Account;
+import cn.bumo.access.adaptation.blockchain.bc.response.test.TestTxResult;
 import cn.bumo.access.utils.blockchain.BlockchainKeyPair;
 import cn.bumo.access.utils.blockchain.SecureKeyGenerator;
 import cn.bumo.sdk.core.config.SDKConfig;
@@ -10,6 +11,7 @@ import cn.bumo.sdk.core.exception.SdkException;
 import cn.bumo.sdk.core.operation.impl.CreateAccountOperation;
 import cn.bumo.sdk.core.spi.BcOperationService;
 import cn.bumo.sdk.core.spi.BcQueryService;
+import cn.bumo.sdk.core.transaction.EvalTransaction;
 import cn.bumo.sdk.core.transaction.Transaction;
 import cn.bumo.sdk.core.transaction.model.TransactionCommittedResult;
 import cn.bumo.sdk.core.utils.GsonUtil;
@@ -37,24 +39,21 @@ public abstract class TestConfig{
     @BeforeClass
     public static void configSdk() throws SdkException{
 
-        String eventUtis = "ws://192.168.10.100:7053,ws://192.168.10.110:7053,ws://192.168.10.120:7053,ws://192.168.10.130:7053";
-        String ips = "192.168.10.100:29333,192.168.10.110:29333,192.168.10.120:29333,192.168.10.130:29333";
+        String eventUtis = "ws://192.168.7.51:36003,ws://192.168.7.52:36003,ws://192.168.7.53:36003,ws://192.168.7.54:36003";
+        String ips = "192.168.7.51:36002,192.168.7.52:36002,192.168.7.53:36002,192.168.7.54:36002";
 
         SDKConfig config = new SDKConfig();
         SDKProperties sdkProperties = new SDKProperties();
         sdkProperties.setEventUtis(eventUtis);
         sdkProperties.setIps(ips);
-        sdkProperties.setAccountPoolEnable(true);
         sdkProperties.setAddress(address);
         sdkProperties.setPublicKey(publicKey);
         sdkProperties.setPrivateKey(privateKey);
-        sdkProperties.setSize(12);
-        sdkProperties.setMark("test-demo-config");
         sdkProperties.setRedisSeqManagerEnable(true);
         sdkProperties.setHost("192.168.10.73");
         sdkProperties.setPort(10379);
         sdkProperties.setPassword("bubi888");
-        sdkProperties.setDatabase("5");
+        sdkProperties.setDatabase("0");
         config.configSdk(sdkProperties);
 
         TestConfig.operationService = config.getOperationService();
@@ -73,7 +72,8 @@ public abstract class TestConfig{
 
         CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
                 .buildDestAddress(keyPair.getBubiAddress())
-                .buildScript("function main(input) { /*do what ever you want*/ }")
+                //.buildScript("function main(input) { /*do what ever you want*/ }")
+                .buildAddInitBalance(1000000000000000000L)
                 .buildAddMetadata("boot自定义key1", "boot自定义value1").buildAddMetadata("boot自定义key2", "boot自定义value2")
                 // 权限部分
                 .buildPriMasterWeight(15)
@@ -84,10 +84,15 @@ public abstract class TestConfig{
                 .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
                 .buildOperationMetadata("操作metadata")// 这个操作应该最后build
                 .build();
+        
+        EvalTransaction newAcctEval = getOperationService().newEvalTransaction(address);
+        
+        TestTxResult fee = newAcctEval.buildAddOperation(createAccountOperation).commit();
 
         TransactionCommittedResult result = transaction.buildAddOperation(createAccountOperation)
                 .buildTxMetadata("交易metadata")
                 .buildAddSigner(publicKey, privateKey)
+                .buildAddFee(fee.getRealFee())
                 .commit();
 
         resultProcess(result, "创建账号状态:");
