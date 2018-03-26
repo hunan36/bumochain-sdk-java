@@ -17,8 +17,8 @@ Access-SDK 使用说明
     - [5设置 修改门限](#5设置-修改门限)  
     - [6合约调用](#6合约调用)  
     - [7业务分支返回形式](#7业务分支返回形式)  
-    - [8支付BU币] 
-    - [9-15评估费用]
+    - [8支付布币](#8支付布币) 
+    - [9评估费用](#9评估费用)
 
 
 ----------
@@ -47,17 +47,11 @@ SDK本身无任何依赖框架，使用时载入配置即可运行，考虑到�
 
 > 其它说明
 1JDK需要1.8以上
-<dependency>
-  <groupId>cn.bumo.access.sdk</groupId>
-  <artifactId>bumo-sdk-core</artifactId>
-  <version>1.0.0</version>
-  <type>pom</type>
-</dependency>
+
 
 
 ### 1简单的config配置使用
 ``` java
-
 public void config() throws SdkException{
     String address = "a0012ea403227b861289ed5fcedd30e51e85ef7397ebc6";
     String publicKey = "b001e9fd31a0fc25af3123f67575cdd0c6b8c2192eead9f58728a3fb46accdc0faa67f";
@@ -86,15 +80,12 @@ public void config() throws SdkException{
     config.getQueryService();
 
 }
-
-
 ```
-
 > 基于简单配置引入sdk-core依赖即可，如：
 ```java
 <dependency>
-    <groupId>cn.bubi.access.sdk</groupId>
-    <artifactId>sdk-core</artifactId>
+    <groupId>cn.bumo.access.sdk</groupId>
+    <artifactId>bumo-sdk-core</artifactId>
     <version>${access-sdk.version}</version>
 </dependency>
 ```
@@ -120,8 +111,8 @@ blockchain.redis-seq.redis[0].password=bubi888
 还需要项目依赖引入sdk-starter
 ```java
 <dependency>
-    <groupId>cn.bubi.access.sdk</groupId>
-    <artifactId>sdk-starter</artifactId>
+    <groupId>cn.bumo.access.sdk</groupId>
+    <artifactId>bumo-sdk-starter</artifactId>
     <version>${access-sdk-starter.version}</version>
 </dependency>
 ```
@@ -493,7 +484,6 @@ SetThresholdOperation
 ### 6合约调用
 
 ```java
-
 /**
  * 合约调用
  */
@@ -544,9 +534,11 @@ public void illegalPublicKeyTest(){
 
 > 大多数失败情况的业务就是回滚数据库和转换调用方异常，主要是确保，交易失败时不要继续执行调用方正常业务
 
-```
-## 8支付BU币 ##
-发起人支付给他人BU币。
+
+### 8支付布币
+
+发起人支付给他人BU币
+
 ```java
 
 /**
@@ -566,7 +558,9 @@ public void payCoin(){
     }
 }
 ```
-## 9-15 评估费用 ##
+
+### 9评估费用
+
 评估创建账户，发行资产，转移资产，修改权限，门限，元数据，支付BU币的费用
 ```java
 
