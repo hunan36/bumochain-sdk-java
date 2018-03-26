@@ -24,6 +24,7 @@ public class PaymentOperation extends AbstractBcOperation{
     private long amount;
     private String issuerAddress;
     private String assetCode;
+    private String input = "";
 
     private PaymentOperation(){
         super(OperationTypeV3.PAYMENT.intValue());
@@ -90,6 +91,13 @@ public class PaymentOperation extends AbstractBcOperation{
             		operation.assetCode = assetCode;
             		payment.getAsset().getKey().setCode(assetCode);
             	});
+        }
+
+        public Builder buildInput(String input) throws SdkException{
+            return buildTemplate(() -> {
+                operation.input = input;
+                operation.payment.setInput(input);
+            });
         }
 
         @Override

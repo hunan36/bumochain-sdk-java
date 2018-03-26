@@ -340,6 +340,6 @@ public class Transaction{
         Assert.checkCollection(signatures, signature -> Assert.notEmpty(signature.getPrivateKey(), SdkError.TRANSACTION_ERROR_PRIVATE_KEY_NOT_EMPTY));
         Assert.notTrue(transactionBlob == null, SdkError.TRANSACTION_ERROR_BLOB_NOT_NULL);
         Assert.isTrue(complete, SdkError.TRANSACTION_ERROR_STATUS);
-        Assert.notTrue(fee == 0, SdkError.TRANSACTION_ERROR_FEE_NOT_ZERO);
+        Assert.notTrue(fee <= 0, SdkError.TRANSACTION_ERROR_FEE_ILLEGAL);
     }
 }

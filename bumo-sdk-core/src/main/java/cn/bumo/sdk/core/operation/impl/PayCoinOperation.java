@@ -18,7 +18,7 @@ public class PayCoinOperation extends AbstractBcOperation{
 
     private String destAddress;
     private long amount;
-    private String input;
+    private String input = "";
     
     private PayCoin payCoin = new PayCoin();
 
@@ -72,7 +72,7 @@ public class PayCoinOperation extends AbstractBcOperation{
         public void checkPass() throws SdkException{
             Assert.notEmpty(operation.destAddress, SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
             Assert.gtZero(operation.amount, SdkError.OPERATION_ERROR_PAYMENT_COIN_ZERO);
-            
+            Assert.notNull(operation.input, SdkError.OPERATION_ERROR_NOT_INPUT);
         }
 
 		

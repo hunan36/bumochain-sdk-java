@@ -53,43 +53,47 @@ public class Demo{
         Account account = queryService.getAccount(address);
         System.out.println(GsonUtil.toJson(account));
 
-        // 简单操作
+        //创建普通用户
         createAccountOperation(config.getOperationService());
+
+        // 创建合约账户:走严格的权限及门限设置
+        createContractAccountOperation(config.getOperationService());
 
     }
 
     /**
-     * 创建账户操作
+     * 创建普通账户操作
      */
     private static void createAccountOperation(BcOperationService operationService){
         try {
-            Transaction transaction = operationService.newTransaction(address);
 
             BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
-            System.out.println(GsonUtil.toJson(keyPair));
-            //SDK封装一个CreateContactAcccountOperation（合约账号）
-            CreateAccountOperation createAccountOperation = new CreateAccountOperation.Builder()
+            System.out.println("key pair" + GsonUtil.toJson(keyPair));
+
+            CreateAccountOperation createAccountOper = new CreateAccountOperation.Builder()
                     .buildDestAddress(keyPair.getBubiAddress())
-                    //.buildScript("function main(input) { /*do what ever you want*/ }")//创建合约账户必须有这一行
-                    .buildAddInitBalance(10000000000000L)
+                    .buildAddInitBalance(100000L)
+                    //.buildAddInitInput("")
+                    // metadatas 描述元数据
                     .buildAddMetadata("key1", "自定义value1").buildAddMetadata("key2", "自定义value2")
-                    // 权限部分
-                    .buildPriMasterWeight(15)
-                    .buildPriTxThreshold(15)
+                    //权限部分：针对合约的创建必须要求权限为0，交易门限为1
+                    .buildPriMasterWeight(15) //默认的要生成账户的权限值
+                    .buildPriTxThreshold(15)  //签名账户列表中不指定门限值默认的操作门限值
+                    // 签名账户列表中特定指定的的操作权限值 共6种操作 1-创建账户2-发布资产3-发布资产4-设置元数据5-操作关联账户权限6-设置门限
                     .buildAddPriTypeThreshold(OperationTypeV3.CREATE_ACCOUNT, 8)
                     .buildAddPriTypeThreshold(OperationTypeV3.SET_METADATA, 6)
                     .buildAddPriTypeThreshold(OperationTypeV3.ISSUE_ASSET, 4)
-                    .buildAddPriSigner(SecureKeyGenerator.generateBubiKeyPair().getBubiAddress(), 10)
-                    //没有签名列表。。。。
                     .build();
-            
+
             EvalTransaction newAcctEval = operationService.newEvalTransaction(address);
-	          TestTxResult testTx = newAcctEval.buildAddOperation(createAccountOperation).commit();
+            TestTxResult testTx = newAcctEval.buildAddOperation(createAccountOper).commit();
 
-	          long fee = testTx.getRealFee();
+            long fee = testTx.getRealFee();
+            System.out.println("normal txfee:" + fee);
 
-
-            TransactionCommittedResult result = transaction.buildAddOperation(createAccountOperation)
+            //创建账户交易
+            Transaction transaction = operationService.newTransaction(address);
+            TransactionCommittedResult result = transaction.buildAddOperation(createAccountOper)
                     .buildTxMetadata("交易metadata")
                     .buildAddSigner(publicKey, privateKey)
                     .buildAddFee(fee)
@@ -98,7 +102,53 @@ public class Demo{
             System.out.println("\n------------------------------------------------");
             System.out.println(GsonUtil.toJson(result));
         } catch (SdkException e) {
-            e.printStackTrace();
+            System.out.println(e);
+            System.out.println("errorCode:" + e.getErrorCode() + ",errorMsg:" + e.getErrorMessage());
+        }
+    }
+
+    /**
+     * 创建合约账户操作
+     */
+    private static void createContractAccountOperation(BcOperationService operationService){
+        try {
+
+            BlockchainKeyPair keyPair = SecureKeyGenerator.generateBubiKeyPair();
+            System.out.println("key pair" + GsonUtil.toJson(keyPair));
+
+            CreateAccountOperation createAccountOper = new CreateAccountOperation.Builder()
+                    // 要生成的账号的地址
+                    .buildDestAddress(keyPair.getBubiAddress())
+                     //合约脚本,严格的语法检查
+                    .buildScript("\"use strict\";function init(bar){  /*init whatever you want*/  return;}function main(input){  let para = JSON.parse(input);  if (para.do_foo)  {    let x = {      'hello' : 'world'    };  }}function query(input){   return input;}")
+                    .buildAddInitBalance(100000L)
+                    .buildAddInitInput("")
+                    // metadatas 描述元数据
+                    .buildAddMetadata("key1", "自定义value1").buildAddMetadata("key2", "自定义value2")
+                     //权限部分：针对合约的创建必须要求权限为0，交易门限为1
+                    .buildPriMasterWeight(0) //默认的要生成账户的权限值
+                    .buildPriTxThreshold(1)  //签名账户列表中不指定门限值默认的操作门限值
+                    .build();
+
+            EvalTransaction newAcctEval = operationService.newEvalTransaction(address);
+            TestTxResult testTx = newAcctEval.buildAddOperation(createAccountOper).commit();
+
+            long fee = testTx.getRealFee();
+            System.out.println("contract txfee:" + fee);
+
+            //创建账户交易
+            Transaction transaction = operationService.newTransaction(address);
+            TransactionCommittedResult result = transaction.buildAddOperation(createAccountOper)
+                    .buildTxMetadata("交易metadata")
+                    .buildAddSigner(publicKey, privateKey)
+                    .buildAddFee(fee)
+                    .commit();
+
+            System.out.println("\n------------------------------------------------");
+            System.out.println(GsonUtil.toJson(result));
+        } catch (SdkException e) {
+            System.out.println(e);
+            System.out.println("errorCode:" + e.getErrorCode() + ",errorMsg:" + e.getErrorMessage());
         }
     }
 

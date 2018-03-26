@@ -36,9 +36,9 @@ public class CreateAccountOperation extends AbstractBcOperation{
         Chain.OperationCreateAccount.Builder operationCreateAccount = Chain.OperationCreateAccount.newBuilder();
         operationCreateAccount.setDestAddress(createAccount.getDestAddress());
         operationCreateAccount.setInitBalance(createAccount.getInitBalance());
-        
-        if(!StringUtils.isEmpty(createAccount.getInitInput()))
-        	operationCreateAccount.setInitInput(createAccount.getInitInput());
+        if(createAccount.getInitInput() != null){
+            operationCreateAccount.setInitInput(createAccount.getInitInput());
+        }
         // Meta Data
         List<SetMetadata> metadatas = createAccount.getMetadatas();
         if (metadatas != null && metadatas.size() > 0) {
@@ -148,8 +148,9 @@ public class CreateAccountOperation extends AbstractBcOperation{
         @Override
         public void checkPass() throws SdkException{
             Assert.notEmpty(operation.createAccount.getDestAddress(), SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
+            //Assert.notNull(operation.createAccount.getInitInput(),SdkError.OPERATION_ERROR_NOT_INITINPUT);
             if(SDKConfig.initBalanceEnable){
-                Assert.notTrue(operation.createAccount.getInitBalance() == 0, SdkError.OPERATION_ERROR_NOT_INITBALANCE);
+                Assert.notTrue(operation.createAccount.getInitBalance() <= 0, SdkError.OPERATION_ERROR_INITBALANCE_ILLEGAL);
             }
         }
 
