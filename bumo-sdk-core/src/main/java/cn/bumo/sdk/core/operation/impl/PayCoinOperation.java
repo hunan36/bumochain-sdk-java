@@ -15,11 +15,6 @@ import cn.bumo.sdk.core.utils.Assert;
  * 支付BU币
  */
 public class PayCoinOperation extends AbstractBcOperation{
-
-    private String destAddress;
-    private long amount;
-    private String input = "";
-    
     private PayCoin payCoin = new PayCoin();
 
     private PayCoinOperation(){
@@ -29,9 +24,9 @@ public class PayCoinOperation extends AbstractBcOperation{
     @Override
     protected void buildOperationContinue(Chain.Operation.Builder operation){
         Chain.OperationPayCoin.Builder operationPayCoin = Chain.OperationPayCoin.newBuilder();
-        operationPayCoin.setDestAddress(destAddress);
-        operationPayCoin.setAmount(amount);
-        operationPayCoin.setInput(input);
+        operationPayCoin.setDestAddress(payCoin.getDestAddress());
+        operationPayCoin.setAmount(payCoin.getAmount());
+        operationPayCoin.setInput(payCoin.getInput());
 
         operation.setPayCoin(operationPayCoin);
         
@@ -48,21 +43,18 @@ public class PayCoinOperation extends AbstractBcOperation{
 
         public Builder buildTargetAddress(String targetAddress) throws SdkException{
             return buildTemplate(() -> {
-		            	operation.destAddress = targetAddress;
 		            	operation.payCoin.setDestAddress(targetAddress);
             		});
         }
 
         public Builder buildAmount(long amount) throws SdkException{
             return buildTemplate(() -> {
-            			operation.amount = amount;
             			operation.payCoin.setAmount(amount);
             		});
         }
         
         public Builder buildInput(String input) throws SdkException{
             return buildTemplate(() -> {
-            			operation.input = input;
             			operation.payCoin.setInput(input);
             		});
         }
@@ -70,13 +62,10 @@ public class PayCoinOperation extends AbstractBcOperation{
 
         @Override
         public void checkPass() throws SdkException{
-            Assert.notEmpty(operation.destAddress, SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
-            Assert.gtZero(operation.amount, SdkError.OPERATION_ERROR_PAYMENT_COIN_ZERO);
-            Assert.notNull(operation.input, SdkError.OPERATION_ERROR_NOT_INPUT);
+            Assert.notEmpty(operation.payCoin.getDestAddress(), SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
+            Assert.gtZero(operation.payCoin.getAmount(), SdkError.OPERATION_ERROR_PAYMENT_COIN_ZERO);
+            Assert.notNull(operation.payCoin.getInput(), SdkError.OPERATION_ERROR_NOT_INPUT);
         }
-
-		
-        
         
     }
     public PayCoin getPayCoin() {

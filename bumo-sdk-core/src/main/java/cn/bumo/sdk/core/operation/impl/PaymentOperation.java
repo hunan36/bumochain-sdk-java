@@ -20,12 +20,6 @@ public class PaymentOperation extends AbstractBcOperation{
 	
 	private Payment payment = new Payment();
 
-    private String targetAddress;
-    private long amount;
-    private String issuerAddress;
-    private String assetCode;
-    private String input = "";
-
     private PaymentOperation(){
         super(OperationTypeV3.PAYMENT.intValue());
     }
@@ -33,14 +27,14 @@ public class PaymentOperation extends AbstractBcOperation{
     @Override
     protected void buildOperationContinue(Chain.Operation.Builder operation){
         Chain.OperationPayment.Builder operationPayment = Chain.OperationPayment.newBuilder();
-        operationPayment.setDestAddress(targetAddress);
+        operationPayment.setDestAddress(payment.getDestAddress());
 
         Chain.Asset.Builder asset = Chain.Asset.newBuilder();
         Chain.AssetKey.Builder assetKey = Chain.AssetKey.newBuilder();
-        assetKey.setIssuer(issuerAddress);
-        assetKey.setCode(assetCode);
+        assetKey.setIssuer(payment.getAsset().getKey().getIssuer());
+        assetKey.setCode(payment.getAsset().getKey().getCode());
         asset.setKey(assetKey);
-        asset.setAmount(amount);
+        asset.setAmount(payment.getAsset().getAmount());
         operationPayment.setAsset(asset);
         operation.setPayment(operationPayment);
     }
@@ -62,50 +56,40 @@ public class PaymentOperation extends AbstractBcOperation{
 
         public Builder buildTargetAddress(String targetAddress) throws SdkException{
             return buildTemplate(() -> {
-            		operation.targetAddress = targetAddress;
             		operation.payment.setDestAddress(targetAddress);
             	});
         }
 
         public Builder buildAmount(long amount) throws SdkException{
             return buildTemplate(() -> {
-            		operation.amount = amount;
-//            		Asset asset = operation.payment.getAsset();
-//            		asset.setAmount(amount);
-//            		operation.payment.setAsset(asset);
             		this.payment.getAsset().setAmount(amount);
             	});
         }
 
         public Builder buildIssuerAddress(String issuerAddress) throws SdkException{
             return buildTemplate(() -> {
-            	operation.issuerAddress = issuerAddress;
-            	//Asset asset = operation.payment.getAsset();
-            	//asset.getProperty()
             	payment.getAsset().getKey().setIssuer(issuerAddress);
             });
         }
 
         public Builder buildAssetCode(String assetCode) throws SdkException{
             return buildTemplate(() ->{ 
-            		operation.assetCode = assetCode;
             		payment.getAsset().getKey().setCode(assetCode);
             	});
         }
 
         public Builder buildInput(String input) throws SdkException{
             return buildTemplate(() -> {
-                operation.input = input;
                 operation.payment.setInput(input);
             });
         }
 
         @Override
         public void checkPass() throws SdkException{
-            Assert.notEmpty(operation.targetAddress, SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
-            Assert.notEmpty(operation.issuerAddress, SdkError.OPERATION_ERROR_ISSUE_SOURCE_ADDRESS);
-            Assert.notEmpty(operation.assetCode, SdkError.OPERATION_ERROR_ISSUE_CODE);
-            Assert.gtZero(operation.amount, SdkError.OPERATION_ERROR_PAYMENT_AMOUNT_ZERO);
+            Assert.notEmpty(payment.getDestAddress(), SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
+            Assert.notEmpty(payment.getAsset().getKey().getIssuer(), SdkError.OPERATION_ERROR_ISSUE_SOURCE_ADDRESS);
+            Assert.notEmpty(payment.getAsset().getKey().getCode(), SdkError.OPERATION_ERROR_ISSUE_CODE);
+            Assert.gtZero(payment.getAsset().getAmount(), SdkError.OPERATION_ERROR_PAYMENT_AMOUNT_ZERO);
         }
     }
 

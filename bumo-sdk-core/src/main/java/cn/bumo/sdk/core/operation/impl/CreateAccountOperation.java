@@ -152,6 +152,7 @@ public class CreateAccountOperation extends AbstractBcOperation{
             if(SDKConfig.initBalanceEnable){
                 Assert.notTrue(operation.createAccount.getInitBalance() <= 0, SdkError.OPERATION_ERROR_INITBALANCE_ILLEGAL);
             }
+            Assert.notTrue(operation.createAccount.checkMetadata(),SdkError.OPERATION_ERROR_NOT_METADATA);
         }
 
 		

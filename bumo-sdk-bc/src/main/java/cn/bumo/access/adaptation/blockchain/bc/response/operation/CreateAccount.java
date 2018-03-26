@@ -81,6 +81,15 @@ public class CreateAccount{
 		this.initInput = initInput;
 	}
 
-    
+    /**
+     * 验证metadata的key或者value不能为空
+     * @return
+     */
+    public boolean checkMetadata(){
+        if(!(this.metadatas.size() == 0 || this.metadatas.isEmpty())){
+            return metadatas.stream().anyMatch(md -> md.getKey() == null || md.getValue()==null);
+        }
+        return false;
+    }
 
 }

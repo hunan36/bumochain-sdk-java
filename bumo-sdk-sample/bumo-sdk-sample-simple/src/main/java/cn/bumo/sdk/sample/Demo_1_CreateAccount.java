@@ -58,7 +58,7 @@ public class Demo_1_CreateAccount {
           
           BlockchainKeyPair user2 = SecureKeyGenerator.generateBubiKeyPair();
           
-          
+          long before = System.currentTimeMillis();
           
           BcOperation bcOperation = new CreateAccountOperation.Builder()
         		  // 要生成的账号的地址
@@ -79,6 +79,10 @@ public class Demo_1_CreateAccount {
                   .buildAddPriSigner(user1.getBubiAddress(), 10)
                   .buildAddPriSigner(user2.getBubiAddress(), 10)
                   .build();
+          
+          long now = System.currentTimeMillis();
+  		
+  		  System.out.println("耗时："+(now- before));
           
           EvalTransaction newAcctEval = engine.getOperationService().newEvalTransaction(engine.getSdkProperties().getAddress());
           TestTxResult fee = newAcctEval.buildAddOperation(bcOperation).commit();

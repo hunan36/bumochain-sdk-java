@@ -15,8 +15,6 @@ import cn.bumo.sdk.core.utils.Assert;
  */
 public class IssueAssetOperation extends AbstractBcOperation{
 
-    private long amount;
-    private String assetCode;
     private IssueAsset issueAsset = new IssueAsset();
 
     private IssueAssetOperation(){
@@ -30,12 +28,12 @@ public class IssueAssetOperation extends AbstractBcOperation{
 
         Chain.Asset.Builder asset = Chain.Asset.newBuilder();
         Chain.AssetKey.Builder assetKey = Chain.AssetKey.newBuilder();
-        assetKey.setCode(assetCode);
+        assetKey.setCode(issueAsset.getCode());
 
         asset.setKey(assetKey);
-        asset.setAmount(amount);
-        operationIssueAsset.setCode(assetCode);
-        operationIssueAsset.setAmount(amount);
+        asset.setAmount(issueAsset.getAmount());
+        operationIssueAsset.setCode(issueAsset.getCode());
+        operationIssueAsset.setAmount(issueAsset.getAmount());
 
         operation.setIssueAsset(operationIssueAsset);
     }
@@ -53,26 +51,23 @@ public class IssueAssetOperation extends AbstractBcOperation{
 
         public Builder buildAmount(long amount) throws SdkException{
             return buildTemplate(() -> {
-            	operation.amount = amount;
             	this.issueAsset.setAmount(amount);
             });
         }
 
         public Builder buildAssetCode(String assetCode) throws SdkException{
             return buildTemplate(() ->{ 
-            		operation.assetCode = assetCode;
             		this.issueAsset.setCode(assetCode);
             	});
         }
 
         @Override
         public void checkPass() throws SdkException{
-            Assert.notEmpty(operation.assetCode, SdkError.OPERATION_ERROR_ISSUE_CODE);
-            Assert.gteZero(operation.amount, SdkError.OPERATION_ERROR_ISSUE_AMOUNT_ZERO);
+            Assert.notEmpty(issueAsset.getCode(), SdkError.OPERATION_ERROR_ISSUE_CODE);
+            Assert.gteZero(issueAsset.getAmount(), SdkError.OPERATION_ERROR_ISSUE_AMOUNT_ZERO);
         }
 
     }
-
 
 	public IssueAsset getIssueAsset() {
 		return issueAsset;

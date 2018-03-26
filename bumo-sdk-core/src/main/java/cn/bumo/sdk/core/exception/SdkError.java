@@ -32,6 +32,7 @@ public enum SdkError{
     OPERATION_ERROR_NOT_INITINPUT(10019,"initInput不能为空"),
     OPERATION_ERROR_INITBALANCE_ILLEGAL(10020,"initBalance值非法"),
     OPERATION_ERROR_NOT_INPUT(10021,"input不能为空"),
+    OPERATION_ERROR_NOT_METADATA(10022,"metadata的key或者value不能为空"),
 
     TRANSACTION_ERROR_SPONSOR(10100, "交易发起人不能为空"),
     TRANSACTION_ERROR_SIGNATURE(10101, "交易签名列表不能为空"),
