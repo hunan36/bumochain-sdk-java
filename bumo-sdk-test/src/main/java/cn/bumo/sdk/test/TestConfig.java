@@ -29,9 +29,9 @@ public abstract class TestConfig{
 
     static Logger LOGGER = LoggerFactory.getLogger(TestConfig.class);
 
-    static final String address = "a0010d826c3948aad065136a3526343b1d0cd076cf97be";
-    static final String publicKey = "b0019a293bcfe8f819ce3ffa7b0a9b45b0c6a5d28f791da56c93e1234ec7bf3d81be2e";
-    static final String privateKey = "c001c1fab8dc191360658f3df91693e04c179021dc09cb5aeddb75b2ba359f654b5aed";
+    static final String address = "buQdwLcW5dcWEg8cbKrFN3WKPXXwh5JTqKAH";
+    static final String publicKey = "b00121a6f43b505453bf8f3ed72966a6886632a1b6bec224062762309dbc143da24a92dcf038";
+    static final String privateKey = "privbUNfe7NtchzD4aJnPYSZEr3TXPU2upKemTrV26NfM7XLSY9C12po";
 
     private static BcOperationService operationService;
     private static BcQueryService queryService;

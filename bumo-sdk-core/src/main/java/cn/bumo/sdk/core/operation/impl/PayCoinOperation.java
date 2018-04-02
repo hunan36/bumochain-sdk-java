@@ -2,6 +2,7 @@ package cn.bumo.sdk.core.operation.impl;
 
 import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.operation.PayCoin;
+import cn.bumo.access.utils.spring.StringUtils;
 import cn.bumo.blockchain.adapter3.Chain;
 import cn.bumo.sdk.core.exception.SdkError;
 import cn.bumo.sdk.core.exception.SdkException;
@@ -26,8 +27,9 @@ public class PayCoinOperation extends AbstractBcOperation{
         Chain.OperationPayCoin.Builder operationPayCoin = Chain.OperationPayCoin.newBuilder();
         operationPayCoin.setDestAddress(payCoin.getDestAddress());
         operationPayCoin.setAmount(payCoin.getAmount());
-        operationPayCoin.setInput(payCoin.getInput());
-
+		if(!StringUtils.isEmpty(payCoin.getInput())){
+        	operationPayCoin.setInput(payCoin.getInput());
+    	}
         operation.setPayCoin(operationPayCoin);
         
     }
@@ -64,7 +66,7 @@ public class PayCoinOperation extends AbstractBcOperation{
         public void checkPass() throws SdkException{
             Assert.notEmpty(operation.payCoin.getDestAddress(), SdkError.OPERATION_ERROR_NOT_DESC_ADDRESS);
             Assert.gtZero(operation.payCoin.getAmount(), SdkError.OPERATION_ERROR_PAYMENT_COIN_ZERO);
-            Assert.notNull(operation.payCoin.getInput(), SdkError.OPERATION_ERROR_NOT_INPUT);
+            //Assert.notNull(operation.payCoin.getInput(), SdkError.OPERATION_ERROR_NOT_INPUT);
         }
         
     }

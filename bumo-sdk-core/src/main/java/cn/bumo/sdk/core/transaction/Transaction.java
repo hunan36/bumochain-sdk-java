@@ -108,6 +108,8 @@ public class Transaction{
         this.transactionBlob = transactionSerializable.getTransactionBlob();
         if (transactionSerializable.getSignatures() != null && !transactionSerializable.getSignatures().isEmpty())
             this.signatures = transactionSerializable.getSignatures();
+
+        this.fee = transactionSerializable.getFee();
     }
 
     public Transaction buildAddSigner(String publicKey, String privateKey) throws SdkException{
@@ -190,7 +192,7 @@ public class Transaction{
     }
 
     public TransactionSerializable forSerializable(){
-        return new TransactionSerializable(transactionBlob, signatures);
+        return new TransactionSerializable(transactionBlob, signatures, fee);
     }
 
     public TransactionBlob getTransactionBlob() throws SdkException{

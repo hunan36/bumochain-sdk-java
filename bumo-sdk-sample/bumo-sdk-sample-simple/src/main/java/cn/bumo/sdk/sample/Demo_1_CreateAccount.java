@@ -77,7 +77,7 @@ public class Demo_1_CreateAccount {
                   .buildAddPriTypeThreshold(OperationTypeV3.SET_METADATA, 6)
                   .buildAddPriTypeThreshold(OperationTypeV3.ISSUE_ASSET, 4)
                   .buildAddPriSigner(user1.getBubiAddress(), 10)
-                  .buildAddPriSigner(user2.getBubiAddress(), 10)
+                 // .buildAddPriSigner(user2.getBubiAddress(), 10)
                   .build();
           
           long now = System.currentTimeMillis();

@@ -107,7 +107,7 @@ public class OperationTest extends TestConfig{
                     .buildAddOperation(bcOperation)
                     .buildAddFee(fee.getRealFee())
                     // 调用方可以在这里设置一个预期的区块偏移量，1个区块偏移量=3秒或1分钟，可以用3s进行推断，最快情况1分钟=20个区块偏移量
-                    .buildFinalNotifySeqOffset(Transaction.HIGHT_FINAL_NOTIFY_SEQ_OFFSET)
+                   // .buildFinalNotifySeqOffset(Transaction.HIGHT_FINAL_NOTIFY_SEQ_OFFSET)
                     .generateBlob();
 
             String hash = blob.getHash();
@@ -171,11 +171,21 @@ public class OperationTest extends TestConfig{
             
             
             BlockchainKeyPair user2 = createAccountOperation();
-            bcOperation = OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
+            BcOperation bcOperation1 = OperationFactory.newPaymentOperation(user2.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
             fee = getOperationService().newEvalTransaction(user1.getBubiAddress()).buildAddOperation(bcOperation).commit();
+            
+            
+            
+            
+            
+            BlockchainKeyPair user3 = createAccountOperation();
+            BcOperation bcOperation2 = OperationFactory.newPaymentOperation(user3.getBubiAddress(), user1.getBubiAddress(), assetCode, transferAmount);
+            
             Transaction transferTransaction = getOperationService().newTransaction(user1.getBubiAddress());
             transferTransaction
                     .buildAddOperation(bcOperation)
+                    .buildAddOperation(bcOperation1)
+                    .buildAddOperation(bcOperation2)
                     .buildAddFee(fee.getRealFee())
                     .buildAddSigner(user1.getPubKey(), user1.getPriKey())
                     .commit();

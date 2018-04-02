@@ -13,13 +13,24 @@ public class TransactionSerializable implements Serializable{
 
     private TransactionBlob transactionBlob;
     private List<Signature> signatures;
+    private Long fee;
 
     public TransactionSerializable(){
     }
 
-    public TransactionSerializable(TransactionBlob transactionBlob, List<Signature> signatures){
+    public TransactionSerializable(TransactionBlob transactionBlob, List<Signature> signatures, long fee){
         this.transactionBlob = transactionBlob;
         this.signatures = signatures;
+        this.fee = fee;
+
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public void setFee(Long fee) {
+        this.fee = fee;
     }
 
     public TransactionBlob getTransactionBlob(){

@@ -4,6 +4,7 @@ import cn.bumo.access.adaptation.blockchain.bc.OperationTypeV3;
 import cn.bumo.access.adaptation.blockchain.bc.response.Asset;
 import cn.bumo.access.adaptation.blockchain.bc.response.Key;
 import cn.bumo.access.adaptation.blockchain.bc.response.operation.Payment;
+import cn.bumo.access.utils.spring.StringUtils;
 import cn.bumo.blockchain.adapter3.Chain;
 import cn.bumo.sdk.core.exception.SdkError;
 import cn.bumo.sdk.core.exception.SdkException;
@@ -36,6 +37,9 @@ public class PaymentOperation extends AbstractBcOperation{
         asset.setKey(assetKey);
         asset.setAmount(payment.getAsset().getAmount());
         operationPayment.setAsset(asset);
+        if(!StringUtils.isEmpty(payment.getInput())){
+            operationPayment.setInput(payment.getInput());
+        }
         operation.setPayment(operationPayment);
     }
 

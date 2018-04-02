@@ -36,12 +36,27 @@ public class OperationFactory{
      * 资产转移
      *
      * @param targetAddress 目标地址
-     * @param issuerAddress 源地址
+     * @param issuerAddress 资产发行者地址
      * @param assetCode     资产编码
      * @param amount        资产数量
      */
     public static PaymentOperation newPaymentOperation(String targetAddress, String issuerAddress, String assetCode, long amount) throws SdkException{
         return new PaymentOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).buildTargetAddress(targetAddress).buildIssuerAddress(issuerAddress).build();
+    }
+
+    /**
+     *资产转移
+     *
+     * @param targetAddress 目标地址
+     * @param issuerAddress 资产发行者地址
+     * @param assetCode     资产编码
+     * @param amount        资产数量
+     * @param input
+     * @return
+     * @throws SdkException
+     */
+    public static PaymentOperation newPaymentOperation(String targetAddress, String issuerAddress, String assetCode, long amount, String input) throws SdkException{
+        return new PaymentOperation.Builder().buildAmount(amount).buildAssetCode(assetCode).buildTargetAddress(targetAddress).buildIssuerAddress(issuerAddress).buildInput(input).build();
     }
     /***
      * 支付BU币
@@ -53,7 +68,7 @@ public class OperationFactory{
      * @throws SdkException
      */
     public static PayCoinOperation newPayCoinOperation(String targetAddress, long amount )  throws SdkException{
-    	return newPayCoinOperation(targetAddress,amount,"");
+        return new PayCoinOperation.Builder().buildTargetAddress(targetAddress).buildAmount(amount).build();
     }
     /***
      * 支付BU币
